@@ -27,8 +27,8 @@ def getContours(path, size):
     cropped_image = crop_rows[:, ~np.all(crop_rows == 255, axis=0)]
 
     letter = cv2.resize(cropped_image, size)
-    print("FONT BOX " + path)
-    print(letter.shape)
+    #print("FONT BOX " + path)
+    #print(letter.shape)
     #cv2.imshow("font", letter)
     #cv2.waitKey()
     #cv2.destroyAllWindows()
@@ -36,7 +36,7 @@ def getContours(path, size):
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     return contours, letter.shape
 
-def drawVerticle(image, x, y, fonts, biggestFont, coordinates):
+def drawVerticle(image, x, y, fonts, color, biggestFont, coordinates):
 
     if len(fonts) == 0:
         return coordinates
@@ -48,28 +48,28 @@ def drawVerticle(image, x, y, fonts, biggestFont, coordinates):
     if box[0] > biggestFont:
         biggestFont = box[0]
     for c in contours:
-        print("drawing at: {0} {1} width {2}".format(x, y, box[0]))
+        #print("drawing at: {0} {1} width {2}".format(x, y, box[0]))
         imageThirds = box[0] // 3
         twoThirds = imageThirds + imageThirds
         if x + twoThirds > 640:
-            print("\tX two-thirds of the image: {0}".format(x + twoThirds))
+            #print("\tX two-thirds of the image: {0}".format(x + twoThirds))
             x = 10
             y += biggestFont
 
         if y + twoThirds > 640:
-            print("\tY two-thirds of the image: {0}".format(y + twoThirds))
+            #print("\tY two-thirds of the image: {0}".format(y + twoThirds))
             y = 10
             x += biggestFont
 
         cv2.drawContours(image,
                          contours, -1,
-                         color=(255, 255, 255),
+                         color=color,
                          thickness=cv2.FILLED,
                          offset=(x, y))
-        cv2.rectangle(image,
-                      (x, y),
-                      (x + box[0], y + box[0]),
-                      (255,0,0),2)
+        #cv2.rectangle(image,
+        #              (x, y),
+        #              (x + box[0], y + box[0]),
+        #              (255,0,0),2)
 
     s = getCharacter(f)
     coordinates.append((s, x, y, box[0], box[1]))
@@ -78,43 +78,42 @@ def drawVerticle(image, x, y, fonts, biggestFont, coordinates):
         x = 10
         y += biggestFont
 
-    return drawVerticle(image, x, y, fonts, biggestFont, coordinates)
+    return drawVerticle(image, x, y, fonts, color, biggestFont, coordinates)
 
 
-def drawHorizontal(image, x, y, fonts, biggestFont, coordinates):
+def drawHorizontal(image, x, y, fonts, color, biggestFont, coordinates):
 
     if len(fonts) == 0:
         return coordinates
     f = fonts[0]
     fonts = np.delete(fonts, 0)
-
     size = random.randint(40, 120)
     contours,box = getContours("{0}/{1}".format(FONTS_DIR, f), (size, size))
     if box[0] > biggestFont:
         biggestFont = box[0]
     for c in contours:
-        print("horizontal drawing at: {0} {1} width {2}".format(x, y, box[0]))
+        #print("horizontal drawing at: {0} {1} width {2}".format(x, y, box[0]))
         imageThirds = box[0] // 3
         twoThirds = imageThirds + imageThirds
         if x + twoThirds > 640:
-            print("\tX two-thirds of the image: {0}".format(x + twoThirds))
+            #print("\tX two-thirds of the image: {0}".format(x + twoThirds))
             x = 10
             y += biggestFont
 
         if y + twoThirds > 640:
-            print("\tY two-thirds of the image: {0}".format(y + twoThirds))
+            #print("\tY two-thirds of the image: {0}".format(y + twoThirds))
             y = 10
             x += biggestFont
 
         cv2.drawContours(image,
                          contours, -1,
-                         color=(255, 255, 255),
+                         color=color,
                          thickness=cv2.FILLED,
                          offset=(x, y))
-        cv2.rectangle(image,
-                      (x, y),
-                      (x + box[0], y + box[0]),
-                      (255,0,0),2)
+        #cv2.rectangle(image,
+        #              (x, y),
+        #              (x + box[0], y + box[0]),
+        #              (255,0,0),2)
     s = getCharacter(f)
     coordinates.append((s, x, y, box[0], box[1]))
     y += box[0]
@@ -122,7 +121,7 @@ def drawHorizontal(image, x, y, fonts, biggestFont, coordinates):
         y = 10
         x += biggestFont
 
-    return drawHorizontal(image, x, y, fonts, biggestFont, coordinates)
+    return drawHorizontal(image, x, y, fonts, color, biggestFont, coordinates)
 
 fontmap = {
     'aurek':'a',
@@ -159,3 +158,9 @@ def getCharacter(path):
     name = file.split('_')
     character = name[0]
     return fontmap[character]
+
+def getRandomColor():
+    r = random.randint(0,255)
+    g = random.randint(0,255)
+    b = random.randint(0,255)
+    return r, g, b

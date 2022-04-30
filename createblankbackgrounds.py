@@ -3,21 +3,19 @@ from imageutils import *
 import glob
 import uuid
 
-BACKGROUNDS_DIR = 'backgrounds'
 OUTPUT_DIR = 'output'
 FONTS_DIR = 'fonts'
 IMAGES_DIR = 'images'
 LABELS_DIR = 'labels'
 labelIndex = list(fontmap.values())
 
-backgrounds = glob.glob("{0}/**/**".format(BACKGROUNDS_DIR), recursive=True)
 
 #backgrounds = random.sample(backgrounds, 10)
 
-for b in (background for background in backgrounds
-          if os.path.isfile(background)):
+for i in range(21):
 
-    image = resizeBackground(b, (640, 640))
+    image = np.zeros([640,640,1],dtype=np.uint8)
+    image[:] = 0 
 
     fonts = getfonts(FONTS_DIR)
 
@@ -26,7 +24,7 @@ for b in (background for background in backgrounds
 
     x = random.randint(10, 600)
     y = random.randint(10, 600)
-    color = getRandomColor()
+    color = (255,255,255)
 
     if random.randint(1,2) %2 == 0:
         coordinates = drawVerticle(image, x, y, fonts, color, 0, [])
