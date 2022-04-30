@@ -1,56 +1,59 @@
 import cv2
 from imageutils import *
 import glob
+import uuid
 
 BACKGROUNDS_DIR = 'backgrounds'
 OUTPUT_DIR = 'output'
 FONTS_DIR = 'fonts'
+IMAGES_DIR = 'images'
+LABELS_DIR = 'labels'
+labelIndex = list(fontmap.values())
 
 backgrounds = glob.glob("{0}/**/**".format(BACKGROUNDS_DIR), recursive=True)
 
-backgrounds = random.sample(backgrounds, 10)
+#backgrounds = random.sample(backgrounds, 10)
 
-for b in backgrounds:
+for b in (background for background in backgrounds
+          if os.path.isfile(background)):
 
-    resized_image = resizeBackground(b, (640, 640))
+    image = resizeBackground(b, (640, 640))
 
     fonts = getfonts(FONTS_DIR)
 
     paths = list(map(lambda p: os.path.join(FONTS_DIR, p), fonts))
     randomSplit = random.randint(1,4)
 
-    x = 10
-    y = 10
-    biggestFont = 0
-    for f in fonts:
-        size = random.randint(40, 120)
-        contours,box = getContours("{0}/{1}".format(FONTS_DIR, f), (size, size))
-        if box[0] > biggestFont:
-            biggestFont = box[0]
-        for c in contours:
-            print("drawing at: {0} {1} width {2}".format(x, y, box[0]))
-            imageThirds = box[0] // 3
-            if x + imageThirds + imageThirds > 640:
-                print("two-thirds of the image: {0}".format(x + imageThirds +
-                                                            imageThirds))
-                x = 10
-                y += biggestFont
+    x = random.randint(10, 600)
+    y = random.randint(10, 600)
 
-            cv2.drawContours(resized_image,
-                             contours, -1,
-                             color=(255, 255, 255),
-                             thickness=cv2.FILLED,
-                             offset=(x, y))
-            cv2.rectangle(resized_image,
-                          (x, y),
-                          (x + box[0], y + box[0]),
-                          (255,0,0),2)
-        x += box[0]
-        if x > 640:
-            x = 10
-            y += biggestFont
+    if random.randint(1,2) %2 == 0:
+        coordinates = drawVerticle(image, x, y, fonts, 0, [])
+    else:
+        coordinates = drawHorizontal(image, x, y, fonts, 0, [])
 
-    cv2.imshow("Markedup", resized_image)
-    cv2.waitKey()
+    fileID = uuid.uuid4()
+    cv2.imwrite("{0}/{1}.jpg".format(IMAGES_DIR, fileID), image)
+    with open("{0}/{1}.txt".format(LABELS_DIR, fileID), 'w') as f:
+        for c in coordinates:
+            label = c[0]
+            x = c[1]
+            y = c[2]
+            w = c[3]
+            h = c[4]
+            x_center = (float(x) + (w / 2)) / 640
+            y_center = (float(y) + (h / 2)) / 640
+            width = w / 640
+            height = h / 640
+            index = labelIndex.index(label)
+            f.write("{0} ".format(index))
+            f.write("{0} ".format(x_center))
+            f.write("{0} ".format(y_center))
+            f.write("{0} ".format(width))
+            f.write("{0} \r\n".format(height))
 
-cv2.destroyAllWindows()
+    #cv2.imshow("Markedup", image)
+    #cv2.waitKey()
+
+#cv2.destroyAllWindows()
+

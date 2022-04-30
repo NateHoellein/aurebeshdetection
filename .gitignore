@@ -3,4 +3,7 @@ backgrounds
 fonts
 output
 env
+labels
+images
 *.swp
+yolov5
